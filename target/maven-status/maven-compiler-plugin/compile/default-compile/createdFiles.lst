@@ -1,0 +1,5 @@
+com/devblo/decorators/EventDecorator.class
+com/devblo/decorators/CategoryDecorator.class
+com/devblo/decorators/TagDecorator.class
+com/devblo/decorators/Category.class
+com/devblo/decorators/Tag.class
