@@ -10,13 +10,14 @@ import com.devblo.observer.Observer;
 public class User implements Observer {
     private final String username;
     private final String password;
-    private List<Event> registeredEvents = new ArrayList<>();
+    private List<Event> registeredEvents;
 
     private final Stack<Command> commandStack = new Stack<>();
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+        registeredEvents = new ArrayList<>();
     }
 
     public boolean verifyPassword(String input) {
@@ -29,13 +30,9 @@ public class User implements Observer {
 
     public void addEvent(Event event) {
         // Check if the event is already in the list - prevent duplicates
-        for (Event existingEvent : registeredEvents) {
-            if (existingEvent.getName().equals(event.getName())) {
-                // If event with same name exists, don't add again
-                return;
-            }
+        if (!registeredEvents.contains(event)){
+            registeredEvents.add(event);
         }
-        registeredEvents.add(event);
     }
 
     public void removeEvent(Event event) {

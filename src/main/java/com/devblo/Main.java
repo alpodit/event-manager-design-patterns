@@ -44,7 +44,6 @@ public class Main {
     private static final Map<String, User> userMap = new HashMap<>();
     private static final Map<String, Event> eventMap = new HashMap<>();
 
-
     private static User currentUser = null;
 
     public static void main(String[] args) {
@@ -79,6 +78,8 @@ public class Main {
                 }
                 case 6 -> unregisterEventFlow();
                 case 7 -> {
+                    System.out.println("Logout: "+ currentUser.getRegisteredEvents());
+
                     currentUser = null;
                     authMenu();
                 }
@@ -156,6 +157,7 @@ public class Main {
 
         eventMap.put(categorizedEvent.getName(), categorizedEvent);
         categorizedEvent.addObserver(currentUser);
+        currentUser.addEvent(categorizedEvent);
         System.out.println("✅ Event saved: " + categorizedEvent.getName());
     }
 
