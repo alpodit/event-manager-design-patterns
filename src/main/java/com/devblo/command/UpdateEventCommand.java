@@ -14,37 +14,40 @@ import java.util.List;
 import java.util.Map;
 
 public class UpdateEventCommand implements Command {
-    private final String eventKey;
+    private final String newName;
+    private final String oldName;
     private final Event oldEvent;
     private final Event newEvent;
     private final Map<String, Event> eventMap;
-
-    private final List<Observer> previousObservers; // to restore in undo
+    private final List<Observer> previousObservers;
 
     public UpdateEventCommand(Event original,
-                              String newLocation,
-                              LocalDateTime newDateTime,
+                              String updatedName,
+                              String updatedLocation,
+                              String updatedDescription,
+                              LocalDateTime updatedDateTime,
                               List<Tag> newTags,
                               List<Category> newCategories,
                               Map<String, Event> eventMap,
                               User currentUser) {
 
-        this.eventKey = original.getName();
+        this.oldName = original.getName();
+        this.newName = updatedName;
         this.oldEvent = original;
         this.eventMap = eventMap;
-
-        // ✅ Make a shallow copy of observers to restore on undo
         this.previousObservers = List.copyOf(original.getObservers());
 
-        // ✅ Create updated base event using factory
+        // ✅ Use factory with all updated fields
         Event updatedCore = EventFactory.createEvent(
-                original.getName(),
-                newLocation,
-                newDateTime,
+                updatedName,
+                updatedLocation,
+                updatedDateTime,
                 original.getOrganizer(),
+                updatedDescription,
                 currentUser
         );
-        updatedCore.setCreatorUsername(original.getCreatorUsername());
+
+        updatedCore.setDescription(updatedDescription);
 
         // ✅ Decorate
         TagDecorator tagWrapped = new TagDecorator(updatedCore);
@@ -55,7 +58,7 @@ public class UpdateEventCommand implements Command {
 
         this.newEvent = fullyDecorated;
 
-        // ✅ Reassign all observers to new decorated event
+        // ✅ Transfer observers
         for (Observer o : previousObservers) {
             newEvent.addObserver(o);
             if (o instanceof User user) {
@@ -67,24 +70,30 @@ public class UpdateEventCommand implements Command {
 
     @Override
     public void execute() {
-        eventMap.put(eventKey, newEvent);
+        // Remove old entry if name changed
+        if (!newName.equals(oldName)) {
+            eventMap.remove(oldName);
+        }
+
+        eventMap.put(newName, newEvent);
         newEvent.notifyObservers();
         System.out.println("✅ Event updated.");
     }
 
     @Override
     public void undo() {
-        // Remove new event from all observers
+        // Unlink newEvent from users and restore oldEvent
         for (Observer o : previousObservers) {
             newEvent.removeObserver(o);
             if (o instanceof User user) {
                 user.removeEvent(newEvent);
-                user.addEvent(oldEvent); // restore original
+                user.addEvent(oldEvent);
             }
-            oldEvent.addObserver(o); // restore observer list
+            oldEvent.addObserver(o);
         }
 
-        eventMap.put(eventKey, oldEvent);
+        eventMap.remove(newName);
+        eventMap.put(oldName, oldEvent);
         oldEvent.notifyObservers();
         System.out.println("↩️ Undo: Reverted event to original version.");
     }

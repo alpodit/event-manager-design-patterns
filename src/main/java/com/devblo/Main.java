@@ -19,10 +19,28 @@ import java.util.Map;
 
 // TODO: event silindiğinde registered user'ların list'inden çıkartılmalılar
 
+//A. Event Creation Module: +
+//    +    • Accept event details including event name, location, date, time, and organizer information.
+//    +    • Allow users to assign up to three categories to each event (e.g., Concert, Seminar, Workshop).
+//    +    • Allow users to assign up to three descriptive tags to each event (e.g., Free Entry, Online, Family-
+//        Friendly).
+//    +    • Users can save the entered event details by selecting “Save Event.”
+//B. Event Modification Module:
+//        • A user can modify any event.
+//        • A user can update event details such as location, date, time, and description.
+//        • A user can modify categories and tags associated with an event.
+//        • The system supports undo functionality to revert the most recent modification.
+//C. Event Search Module:
+//    +    • Users can search for events by name, tags, categories, or date.
+//    +    • Users can sort the search results in either ascending or descending order by event name.
+//D. Event Registration Module:
+//        • Members can register to attend events.
+//        • The system maintains a registration count for each event.
+//        • Members can cancel their registration.
+
 public class Main {
     private static final Map<String, User> userMap = new HashMap<>();
     private static final Map<String, Event> eventMap = new HashMap<>();
-    private static final CommandHistory commandHistory = new CommandHistory();
 
 
     private static User currentUser = null;
@@ -49,7 +67,14 @@ public class Main {
                 case 2 -> browseAndRegisterForEvents();
                 case 3 -> searchEventsFlow();
                 case 4 -> modifyEventFlow();
-                case 5 -> commandHistory.undoLast();
+                case 5 -> {
+                    if (currentUser.hasUndo()) {
+                        Command last = currentUser.popCommand();
+                        last.undo();
+                    } else {
+                        ConsoleUI.print("⚠️ You have no previous modifications to undo.");
+                    }
+                }
                 case 6 -> unregisterEventFlow();
                 case 7 -> {
                     currentUser = null;
@@ -112,13 +137,9 @@ public class Main {
         String location = ConsoleUI.prompt("Enter event location:");
         LocalDateTime dateTime = promptDateTime();
         String organizer = ConsoleUI.prompt("Organizer name:");
+        String description = ConsoleUI.prompt("Enter event description:");
 
-        Event baseEvent = EventFactory.createEvent(name, location, dateTime, organizer,currentUser);
-        baseEvent.setCreatorUsername(currentUser.getUsername());
-
-        List<Tag> newTags = promptTags();
-        List<Category> newCats = promptCategories();
-
+        Event baseEvent = EventFactory.createEvent(name, location, dateTime,description, organizer,currentUser);
 
         // Decorate with tags
         TagDecorator taggedEvent = new TagDecorator(baseEvent);
@@ -133,7 +154,7 @@ public class Main {
 
         CreateEventCommand cmd = new CreateEventCommand(categorizedEvent, eventMap);
         cmd.execute();
-        commandHistory.push(cmd);
+        currentUser.pushCommand(cmd);
         ConsoleUI.print("📌 Event saved: " + categorizedEvent.getName());
 
     }
@@ -170,7 +191,7 @@ public class Main {
 
     private static void modifyEventFlow() {
         List<Event> owned = currentUser.getRegisteredEvents().stream()
-                .filter(e -> e.getCreatorUsername().equals(currentUser.getUsername()))
+                .filter(e -> e.getCreatorUser().equals(currentUser))
                 .toList();
 
         if (owned.isEmpty()) {
@@ -209,24 +230,55 @@ public class Main {
     }
 
     private static void handleUpdateEvent(Event event) {
-        String newLoc = ConsoleUI.prompt("New location:");
-        LocalDateTime newTime = promptDateTime();
+        ConsoleUI.print("Leave fields blank to keep current values.");
+
+        String newName = ConsoleUI.prompt("New name (current: " + event.getName() + "):").trim();
+        String newLoc = ConsoleUI.prompt("New location (current: " + event.getLocation() + "):").trim();
+        String newDesc = ConsoleUI.prompt("New description (current: " + event.getDescriptionText() + "):").trim();
+
+        // Flexible datetime input
+        ConsoleUI.print("Update date/time? (Leave blank to skip)");
+        String dateInput = ConsoleUI.prompt("New date (YYYY-MM-DD):").trim();
+        String timeInput = ConsoleUI.prompt("New time (HH:MM):").trim();
+        LocalDateTime newDateTime = null;
+
+        if (!dateInput.isEmpty() && !timeInput.isEmpty()) {
+            try {
+                String[] dateParts = dateInput.split("-");
+                String[] timeParts = timeInput.split(":");
+                int year = Integer.parseInt(dateParts[0]);
+                int month = Integer.parseInt(dateParts[1]);
+                int day = Integer.parseInt(dateParts[2]);
+                int hour = Integer.parseInt(timeParts[0]);
+                int minute = Integer.parseInt(timeParts[1]);
+
+                newDateTime = LocalDateTime.of(year, month, day, hour, minute);
+            } catch (Exception e) {
+                ConsoleUI.print("❌ Invalid date/time format. Keeping original.");
+            }
+        }
+
         List<Tag> newTags = promptTags();
         List<Category> newCats = promptCategories();
 
-        UpdateEventCommand cmd = new UpdateEventCommand(event, newLoc, newTime, newTags, newCats, eventMap,currentUser);
+        // Fall back to old values if empty
+        if (newName.isEmpty()) newName = event.getName();
+        if (newLoc.isEmpty()) newLoc = event.getLocation();
+        if (newDesc.isEmpty()) newDesc = event.getDescriptionText();
+        if (newDateTime == null) newDateTime = event.getDateTime();
+
+        UpdateEventCommand cmd = new UpdateEventCommand(
+                event, newName, newLoc, newDesc, newDateTime, newTags, newCats, eventMap, currentUser
+        );
         cmd.execute();
-        commandHistory.push(cmd);
+        currentUser.pushCommand(cmd);
     }
 
     private static void handleDeleteEvent(Event event) {
         DeleteEventCommand cmd = new DeleteEventCommand(event, eventMap);
         cmd.execute();
-        commandHistory.push(cmd);
+        currentUser.pushCommand(cmd);
     }
-
-
-
 
     private static List<Tag> promptTags() {
         List<Tag> result = new ArrayList<>();
@@ -400,9 +452,6 @@ public class Main {
             ConsoleUI.print("🔁 Please enter valid category numbers.");
         }
     }
-
-
-
 
 
     private static LocalDateTime promptDateTime() {

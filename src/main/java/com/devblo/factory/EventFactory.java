@@ -8,8 +8,8 @@ import com.devblo.models.User;
 
 public class EventFactory {
 
-    public static Event createEvent(String name, String location, LocalDateTime dateTime, String organizer, User currentUser) {
-        Event e = new Event(name, location, dateTime, organizer);
+    public static Event createEvent(String name, String location, LocalDateTime dateTime, String description, String organizer, User currentUser) {
+        Event e = new Event(name, location, dateTime,description, organizer,currentUser);
         e.addObserver(currentUser);
         currentUser.addEvent(e);
 

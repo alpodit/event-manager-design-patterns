@@ -12,26 +12,23 @@ public class Event implements Subject {
     private String location;
     private LocalDateTime dateTime;
     private String organizer;
+    private String description;
+    private User creatorUser;
 
     private List<Observer> observers = new ArrayList<>();
 
-    public Event(String name, String location, LocalDateTime dateTime, String organizer) {
+    public Event(String name, String location, LocalDateTime dateTime, String description, String organizer,User creator) {
         this.name = name;
         this.location = location;
         this.dateTime = dateTime;
         this.organizer = organizer;
+        this.description = description;
+        this.creatorUser = creator;
     }
 
-    private String creatorUsername;
-
-    public String getCreatorUsername() {
-        return creatorUsername;
+    public User getCreatorUser() {
+        return creatorUser;
     }
-
-    public void setCreatorUsername(String creatorUsername) {
-        this.creatorUsername = creatorUsername;
-    }
-
 
     public String getName() {
         return name;
@@ -76,8 +73,12 @@ public class Event implements Subject {
         return "Event: " + name + ", Location: " + location + ", Date: " + dateTime + ", Organizer: " + organizer;
     }
 
-    public List<Observer> copyObservers() {
-        return new ArrayList<>(observers); // safe shallow copy
+    public String getDescriptionText() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }
