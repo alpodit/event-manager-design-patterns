@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.devblo.decorators.Category;
+import com.devblo.decorators.Tag;
 import com.devblo.observer.Subject;
 import com.devblo.observer.Observer;
 
@@ -79,6 +81,14 @@ public class Event implements Subject {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<Tag> getTags() {
+        return new ArrayList<>();
+    }
+
+    public List<Category> getCategories() {
+        return new ArrayList<>();
     }
 
 }

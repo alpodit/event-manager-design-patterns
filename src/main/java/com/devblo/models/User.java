@@ -14,8 +14,6 @@ public class User implements Observer {
 
     private final Stack<Command> commandStack = new Stack<>();
 
-
-
     public User(String username, String password) {
         this.username = username;
         this.password = password;
@@ -30,11 +28,19 @@ public class User implements Observer {
     }
 
     public void addEvent(Event event) {
+        // Check if the event is already in the list - prevent duplicates
+        for (Event existingEvent : registeredEvents) {
+            if (existingEvent.getName().equals(event.getName())) {
+                // If event with same name exists, don't add again
+                return;
+            }
+        }
         registeredEvents.add(event);
     }
 
     public void removeEvent(Event event) {
-        registeredEvents.remove(event);
+        // Remove by reference or by name if reference is different
+        registeredEvents.removeIf(e -> e == event || e.getName().equals(event.getName()));
     }
 
     public List<Event> getRegisteredEvents() {

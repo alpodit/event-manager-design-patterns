@@ -10,6 +10,7 @@ import com.devblo.factory.EventFactory;
 import com.devblo.observer.Observer;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public class UpdateEventCommand implements Command {
     private final String newName;
     private final String oldName;
     private final Event oldEvent;
-    private final Event newEvent;
+    private Event newEvent;
     private final Map<String, Event> eventMap;
     private final List<Observer> previousObservers;
 
@@ -35,19 +36,17 @@ public class UpdateEventCommand implements Command {
         this.newName = updatedName;
         this.oldEvent = original;
         this.eventMap = eventMap;
-        this.previousObservers = List.copyOf(original.getObservers());
+        this.previousObservers = new ArrayList<>(original.getObservers());
 
         // ✅ Use factory with all updated fields
         Event updatedCore = EventFactory.createEvent(
                 updatedName,
                 updatedLocation,
                 updatedDateTime,
-                original.getOrganizer(),
                 updatedDescription,
+                original.getOrganizer(),
                 currentUser
         );
-
-        updatedCore.setDescription(updatedDescription);
 
         // ✅ Decorate
         TagDecorator tagWrapped = new TagDecorator(updatedCore);
@@ -57,15 +56,6 @@ public class UpdateEventCommand implements Command {
         newCategories.forEach(fullyDecorated::addCategory);
 
         this.newEvent = fullyDecorated;
-
-        // ✅ Transfer observers
-        for (Observer o : previousObservers) {
-            newEvent.addObserver(o);
-            if (o instanceof User user) {
-                user.removeEvent(oldEvent);
-                user.addEvent(newEvent);
-            }
-        }
     }
 
     @Override
@@ -75,6 +65,23 @@ public class UpdateEventCommand implements Command {
             eventMap.remove(oldName);
         }
 
+        // Clear old observers to avoid duplicates
+        for (Observer observer : previousObservers) {
+            oldEvent.removeObserver(observer);
+            if (observer instanceof User user) {
+                user.removeEvent(oldEvent);
+            }
+        }
+
+        // Add observers back to new event and update users
+        for (Observer observer : previousObservers) {
+            newEvent.addObserver(observer);
+            if (observer instanceof User user) {
+                user.addEvent(newEvent);
+            }
+        }
+
+        // Update map and notify observers
         eventMap.put(newName, newEvent);
         newEvent.notifyObservers();
         System.out.println("✅ Event updated.");
@@ -82,18 +89,28 @@ public class UpdateEventCommand implements Command {
 
     @Override
     public void undo() {
-        // Unlink newEvent from users and restore oldEvent
-        for (Observer o : previousObservers) {
-            newEvent.removeObserver(o);
-            if (o instanceof User user) {
+        // First, clear observers from the new event
+        List<Observer> currentObservers = new ArrayList<>(newEvent.getObservers());
+        for (Observer observer : currentObservers) {
+            newEvent.removeObserver(observer);
+            if (observer instanceof User user) {
                 user.removeEvent(newEvent);
-                user.addEvent(oldEvent);
             }
-            oldEvent.addObserver(o);
         }
 
+        // Restore observers to the old event
+        for (Observer observer : previousObservers) {
+            oldEvent.addObserver(observer);
+            if (observer instanceof User user) {
+                user.addEvent(oldEvent);
+            }
+        }
+
+        // Update map
         eventMap.remove(newName);
         eventMap.put(oldName, oldEvent);
+
+        // Notify observers
         oldEvent.notifyObservers();
         System.out.println("↩️ Undo: Reverted event to original version.");
     }

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryDecorator extends EventDecorator {
-    private List<Category> categories = new ArrayList<>();
+    private final List<Category> categories = new ArrayList<>();
 
     public CategoryDecorator(Event event) {
         super(event);
@@ -18,12 +18,13 @@ public class CategoryDecorator extends EventDecorator {
         }
     }
 
+    @Override
     public List<Category> getCategories() {
         return categories;
     }
 
     @Override
     public String getDescription() {
-        return event.getDescription() + " | Categories: " + categories;
+        return event.getDescription() + " | Categories: " + getCategories();
     }
 }

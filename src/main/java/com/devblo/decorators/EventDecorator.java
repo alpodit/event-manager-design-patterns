@@ -1,40 +1,64 @@
 package com.devblo.decorators;
 
 import com.devblo.models.Event;
+import com.devblo.observer.Observer;
+import com.devblo.observer.Subject;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-public abstract class EventDecorator extends Event {
+public class EventDecorator extends Event implements Subject {
     protected Event event;
 
     public EventDecorator(Event event) {
-        super(event.getName(), event.getLocation(), event.getDateTime(), event.getOrganizer());
+        // String name, String location, LocalDateTime dateTime, String description, String organizer, User creator
+        super(event.getName(), event.getLocation(), event.getDateTime(), event.getDescriptionText(), event.getOrganizer(), event.getCreatorUser());
         this.event = event;
     }
 
+    // Delegate observer methods to the wrapped event
     @Override
-    public String getName() {
-        return event.getName();
+    public void addObserver(Observer observer) {
+        event.addObserver(observer);
     }
 
     @Override
-    public String getLocation() {
-        return event.getLocation();
+    public void removeObserver(Observer observer) {
+        event.removeObserver(observer);
     }
 
     @Override
-    public LocalDateTime getDateTime() {
-        return event.getDateTime();
+    public void notifyObservers() {
+        event.notifyObservers();
     }
 
     @Override
-    public String getOrganizer() {
-        return event.getOrganizer();
-    }
-
-    @Override
-    public List<com.devblo.observer.Observer> getObservers() {
+    public List<Observer> getObservers() {
         return event.getObservers();
+    }
+
+    // Delegate other methods
+    @Override
+    public String getDescription() {
+        return event.getDescription();
+    }
+
+    @Override
+    public String getDescriptionText() {
+        return event.getDescriptionText();
+    }
+
+    @Override
+    public void setDescription(String description) {
+        event.setDescription(description);
+    }
+
+    @Override
+    public List<Tag> getTags() {
+        return event.getTags();
+    }
+
+    @Override
+    public List<Category> getCategories() {
+        return event.getCategories();
     }
 }

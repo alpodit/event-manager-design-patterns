@@ -8,6 +8,7 @@ import com.devblo.decorators.TagDecorator;
 import com.devblo.factory.EventFactory;
 import com.devblo.models.Event;
 import com.devblo.models.User;
+import com.devblo.observer.Observer;
 import com.devblo.strategy.*;
 import com.devblo.ui.ConsoleUI;
 
@@ -17,7 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO: event silindiğinde registered user'ların list'inden çıkartılmalılar
+// TODO: User'ın oluşturduğu eventler'e 2 defa kaydediyor veya modifiye edildiğinde 2. kez kaydediyor bir şekilde
+// TODO: User created eventler silinmiyor sanırım anlamadım. Update edildiğinde 3 tane göstermiş, böyle olmaması lazım
 
 //A. Event Creation Module: +
 //    +    • Accept event details including event name, location, date, time, and organizer information.
@@ -152,11 +154,9 @@ public class Main {
         ConsoleUI.print("\n✅ Event created successfully!");
         ConsoleUI.print(categorizedEvent.getDescription());
 
-        CreateEventCommand cmd = new CreateEventCommand(categorizedEvent, eventMap);
-        cmd.execute();
-        currentUser.pushCommand(cmd);
-        ConsoleUI.print("📌 Event saved: " + categorizedEvent.getName());
-
+        eventMap.put(categorizedEvent.getName(), categorizedEvent);
+        categorizedEvent.addObserver(currentUser);
+        System.out.println("✅ Event saved: " + categorizedEvent.getName());
     }
 
 
@@ -275,9 +275,17 @@ public class Main {
     }
 
     private static void handleDeleteEvent(Event event) {
-        DeleteEventCommand cmd = new DeleteEventCommand(event, eventMap);
-        cmd.execute();
-        currentUser.pushCommand(cmd);
+        List<Observer> removedObservers = new ArrayList<>(event.getObservers());
+        for (Observer o : removedObservers) {
+            event.removeObserver(o);
+            if (o instanceof User user) {
+                user.removeEvent(event);
+            }
+        }
+
+        eventMap.remove(event.getName());
+        System.out.println("🗑️ Event deleted: " + event.getName());
+
     }
 
     private static List<Tag> promptTags() {

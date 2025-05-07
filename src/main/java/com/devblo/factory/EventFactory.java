@@ -1,18 +1,12 @@
 package com.devblo.factory;
 
-import java.time.LocalDateTime;
-
 import com.devblo.models.Event;
 import com.devblo.models.User;
 
+import java.time.LocalDateTime;
 
 public class EventFactory {
-
-    public static Event createEvent(String name, String location, LocalDateTime dateTime, String description, String organizer, User currentUser) {
-        Event e = new Event(name, location, dateTime,description, organizer,currentUser);
-        e.addObserver(currentUser);
-        currentUser.addEvent(e);
-
-        return e;
+    public static Event createEvent(String name, String location, LocalDateTime dateTime, String description, String organizer, User creator) {
+        return new Event(name, location, dateTime, description, organizer, creator);
     }
 }

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TagDecorator extends EventDecorator {
-    private List<Tag> tags = new ArrayList<>();
+    private final List<Tag> tags = new ArrayList<>();
 
     public TagDecorator(Event event) {
         super(event);
@@ -18,12 +18,14 @@ public class TagDecorator extends EventDecorator {
         }
     }
 
+    @Override
     public List<Tag> getTags() {
+        System.out.println("TagDecorator.getTags()");
         return tags;
     }
 
     @Override
     public String getDescription() {
-        return event.getDescription() + " | Tags: " + tags;
+        return event.getDescription() + " | Tags: " + getTags();
     }
 }
