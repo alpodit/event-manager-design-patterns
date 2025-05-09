@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+// just to test git commit
 public class Main {
     private static final Map<String, User> userMap = new HashMap<>();
     private static final Map<String, Event> eventMap = new HashMap<>();
