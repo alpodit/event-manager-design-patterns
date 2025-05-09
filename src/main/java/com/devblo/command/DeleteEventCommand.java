@@ -31,6 +31,9 @@ public class DeleteEventCommand implements Command {
 
     @Override
     public void execute() {
+        // Notify observers
+        event.notifyObservers();
+
         List<Observer> removedObservers = new ArrayList<>(event.getObservers());
         for (Observer o : removedObservers) {
             event.removeObserver(o);

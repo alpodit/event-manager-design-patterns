@@ -147,10 +147,16 @@ public class Main {
         ConsoleUI.print("\n✅ Event created successfully!");
         ConsoleUI.print(categorizedEvent.getDescription());
 
-        eventMap.put(categorizedEvent.getName(), categorizedEvent);
-        categorizedEvent.addObserver(currentUser);
-        currentUser.addEvent(categorizedEvent);
-        System.out.println("✅ Event saved: " + categorizedEvent.getName());
+        // Do you want to save event?
+        char choice = ConsoleUI.prompt("\n Do you want to save event? Y/N").toUpperCase().trim().charAt(0);
+        if (choice == 'Y') {
+            eventMap.put(categorizedEvent.getName(), categorizedEvent);
+            categorizedEvent.addObserver(currentUser);
+            currentUser.addEvent(categorizedEvent);
+            ConsoleUI.print("✅ Event saved: " + categorizedEvent.getName());
+        }else {
+            ConsoleUI.print("Cancelled.");
+        }
     }
 
 
@@ -273,10 +279,18 @@ public class Main {
         if (newDesc.isEmpty()) newDesc = event.getDescriptionText();
         if (newDateTime == null) newDateTime = event.getDateTime();
 
-        UpdateEventCommand cmd = new UpdateEventCommand(
-                event, newName, newLoc, newDesc, newDateTime, newTags, newCats, eventMap, currentUser
-        );
-        cmd.execute();
+        // Do you want to save event?
+        char choice = ConsoleUI.prompt("\n Do you want to save updated event? Y/N").toUpperCase().trim().charAt(0);
+        if (choice == 'Y') {
+            UpdateEventCommand cmd = new UpdateEventCommand(
+                    event, newName, newLoc, newDesc, newDateTime, newTags, newCats, eventMap, currentUser
+            );
+            cmd.execute();
+        }else {
+            ConsoleUI.print("Cancelled.");
+        }
+
+
     }
 
     private static void handleDeleteEvent(Event event) {
