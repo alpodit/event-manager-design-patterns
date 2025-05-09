@@ -1,0 +1,49 @@
+# Java-related files
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+logs/
+
+# IDE-specific files
+/.idea/
+/*.iml
+*.swp
+*.swo
+.vscode/
+
+# Build directories
+/target/
+/build/
+/out/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.old
+
+# Dependency directories
+/.mvn/
+/node_modules/
+
+# Generated files
+*.generated
+*.gz
+*.zip
+
+# Application-specific
+/config/*.properties
+/config/*.yml
+/config/*.yaml
+/secrets/
+.env
+
+# Ignore compiled files in bin directory
+/bin/

@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-// just to test git commit
+
+// just to test git commit  test test test
 public class Main {
     private static final Map<String, User> userMap = new HashMap<>();
     private static final Map<String, Event> eventMap = new HashMap<>();
@@ -37,7 +38,6 @@ public class Main {
             ConsoleUI.print("7 - Logout");
             ConsoleUI.print("8 - Exit");
 
-
             int choice = ConsoleUI.promptInt("Select an option:");
 
             switch (choice) {
@@ -48,10 +48,9 @@ public class Main {
                 case 5 -> {
                     if (currentUser.hasUndo()) {
                         Command last = currentUser.popCommand();
-                        try{
+                        try {
                             last.undo();
-                        }
-                        catch (Exception e){
+                        } catch (Exception e) {
                             ConsoleUI.print("Error doing undo: " + e.getMessage());
                             currentUser.pushCommand(last);
                         }
@@ -85,7 +84,8 @@ public class Main {
 
         int choice = ConsoleUI.promptInt("Your choice:");
 
-        if (choice == 6) return;
+        if (choice == 6)
+            return;
 
         SearchStrategy strategy = switch (choice) {
             case 1 -> new SearchByName();
@@ -96,7 +96,8 @@ public class Main {
             default -> null;
         };
 
-        if (strategy == null) return;
+        if (strategy == null)
+            return;
 
         String filter = (choice == 5) ? "" : ConsoleUI.prompt("Enter search keyword:");
 
@@ -113,17 +114,16 @@ public class Main {
         }
     }
 
-
     private static void createEventFlow() {
         ConsoleUI.print("\n📅 Create a New Event");
 
         String name = ConsoleUI.prompt("Enter event name:");
-        while (true){
+        while (true) {
             if (eventMap.containsKey(name)) {
                 ConsoleUI.print("<UNK> Event name already exists.");
 
                 name = ConsoleUI.prompt("Enter event name:");
-            }else {
+            } else {
                 break;
             }
         }
@@ -133,7 +133,7 @@ public class Main {
         String organizer = ConsoleUI.prompt("Organizer name:");
         String description = ConsoleUI.prompt("Enter event description:");
 
-        Event baseEvent = EventFactory.createEvent(name, location, dateTime,description, organizer,currentUser);
+        Event baseEvent = EventFactory.createEvent(name, location, dateTime, description, organizer, currentUser);
 
         // Decorate with tags
         TagDecorator taggedEvent = new TagDecorator(baseEvent);
@@ -154,11 +154,10 @@ public class Main {
             categorizedEvent.addObserver(currentUser);
             currentUser.addEvent(categorizedEvent);
             ConsoleUI.print("✅ Event saved: " + categorizedEvent.getName());
-        }else {
+        } else {
             ConsoleUI.print("Cancelled.");
         }
     }
-
 
     private static void unregisterEventFlow() {
         List<Event> userEvents = currentUser.getRegisteredEvents();
@@ -175,7 +174,8 @@ public class Main {
 
         int index = ConsoleUI.promptInt("Select an event to unregister (0 to cancel):") - 1;
 
-        if (index == -1) return;
+        if (index == -1)
+            return;
 
         if (index < 0 || index >= userEvents.size()) {
             ConsoleUI.print("❌ Invalid selection.");
@@ -205,7 +205,8 @@ public class Main {
         }
 
         int index = ConsoleUI.promptInt("Select event to modify (0 to cancel):") - 1;
-        if (index == -1) return;
+        if (index == -1)
+            return;
         if (index < 0 || index >= owned.size()) {
             ConsoleUI.print("❌ Invalid selection.");
             return;
@@ -214,11 +215,11 @@ public class Main {
         Event event = owned.get(index);
 
         ConsoleUI.print("""
-        🛠️ Modify Options:
-        1 - Update Event (location/time/tags/categories)
-        2 - Delete Event
-        3 - Cancel
-    """);
+                    🛠️ Modify Options:
+                    1 - Update Event (location/time/tags/categories)
+                    2 - Delete Event
+                    3 - Cancel
+                """);
 
         int action = ConsoleUI.promptInt("Choose an action:");
 
@@ -234,12 +235,12 @@ public class Main {
 
         String newName = ConsoleUI.prompt("New name (current: " + event.getName() + "):").trim();
 
-        while (true){
+        while (true) {
             if (!newName.isEmpty() && eventMap.containsKey(newName)) {
                 ConsoleUI.print("<UNK> Event name already exists.");
 
                 newName = ConsoleUI.prompt("New name (current: " + event.getName() + "):").trim();
-            }else {
+            } else {
                 break;
             }
         }
@@ -274,22 +275,24 @@ public class Main {
         List<Category> newCats = promptCategories();
 
         // Fall back to old values if empty
-        if (newName.isEmpty()) newName = event.getName();
-        if (newLoc.isEmpty()) newLoc = event.getLocation();
-        if (newDesc.isEmpty()) newDesc = event.getDescriptionText();
-        if (newDateTime == null) newDateTime = event.getDateTime();
+        if (newName.isEmpty())
+            newName = event.getName();
+        if (newLoc.isEmpty())
+            newLoc = event.getLocation();
+        if (newDesc.isEmpty())
+            newDesc = event.getDescriptionText();
+        if (newDateTime == null)
+            newDateTime = event.getDateTime();
 
         // Do you want to save event?
         char choice = ConsoleUI.prompt("\n Do you want to save updated event? Y/N").toUpperCase().trim().charAt(0);
         if (choice == 'Y') {
             UpdateEventCommand cmd = new UpdateEventCommand(
-                    event, newName, newLoc, newDesc, newDateTime, newTags, newCats, eventMap, currentUser
-            );
+                    event, newName, newLoc, newDesc, newDateTime, newTags, newCats, eventMap, currentUser);
             cmd.execute();
-        }else {
+        } else {
             ConsoleUI.print("Cancelled.");
         }
-
 
     }
 
@@ -325,14 +328,16 @@ public class Main {
                         break;
                     }
                     Tag tag = Tag.values()[idx];
-                    if (!result.contains(tag)) result.add(tag);
+                    if (!result.contains(tag))
+                        result.add(tag);
                 } catch (Exception e) {
                     allValid = false;
                     break;
                 }
             }
 
-            if (allValid) break;
+            if (allValid)
+                break;
             ConsoleUI.print("❌ Invalid input. Try again.");
             result.clear();
         }
@@ -364,14 +369,16 @@ public class Main {
                         break;
                     }
                     Category cat = Category.values()[idx];
-                    if (!result.contains(cat)) result.add(cat);
+                    if (!result.contains(cat))
+                        result.add(cat);
                 } catch (Exception e) {
                     allValid = false;
                     break;
                 }
             }
 
-            if (allValid) break;
+            if (allValid)
+                break;
             ConsoleUI.print("❌ Invalid input. Try again.");
             result.clear();
         }
@@ -425,7 +432,6 @@ public class Main {
         }
     }
 
-
     private static void selectCategories(CategoryDecorator decorator) {
         while (true) {
             ConsoleUI.print("Available Categories:");
@@ -472,7 +478,6 @@ public class Main {
             ConsoleUI.print("🔁 Please enter valid category numbers.");
         }
     }
-
 
     private static LocalDateTime promptDateTime() {
         while (true) {
@@ -559,7 +564,8 @@ public class Main {
 
         int choice = ConsoleUI.promptInt("Enter event number to register (0 to cancel):");
 
-        if (choice == 0) return;
+        if (choice == 0)
+            return;
 
         if (choice < 1 || choice > keys.size()) {
             ConsoleUI.print("❌ Invalid event selection.");
