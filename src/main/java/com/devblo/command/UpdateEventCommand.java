@@ -63,6 +63,7 @@ public class UpdateEventCommand implements Command {
 
     @Override
     public void execute() {
+        
         // Remove old entry if name changed
         if (!newName.equals(oldName)) {
             eventMap.remove(oldName);
@@ -92,7 +93,9 @@ public class UpdateEventCommand implements Command {
     }
 
     @Override
-    public void undo() {
+    public void undo() throws Exception {
+
+        
         // First, clear observers from the new event
         List<Observer> currentObservers = new ArrayList<>(newEvent.getObservers());
         for (Observer observer : currentObservers) {

@@ -72,7 +72,7 @@ public class EventManagerTest {
     }
 
     @Test
-    void testEventUpdateAndUndo() {
+    void testEventUpdateAndUndo() throws Exception {
         Event original = eventMap.get("Tech Talk");
         System.out.println("Actual class of event in map: original " + original.getClass().getName());
         System.out.println(original.getTags());
@@ -138,7 +138,7 @@ public class EventManagerTest {
     }
 
     @Test
-    void testObserversDoNotDuplicateAfterUpdate() {
+    void testObserversDoNotDuplicateAfterUpdate() throws Exception {
         Event original = eventMap.get("Tech Talk");
         original.addObserver(bob);
         bob.addEvent(original);

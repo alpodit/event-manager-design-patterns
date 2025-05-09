@@ -17,8 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO: Handle edge case where users modify an event then deletes and undo's the action. Should say the no undo's to do.
-
 public class Main {
     private static final Map<String, User> userMap = new HashMap<>();
     private static final Map<String, Event> eventMap = new HashMap<>();
@@ -50,7 +48,14 @@ public class Main {
                 case 5 -> {
                     if (currentUser.hasUndo()) {
                         Command last = currentUser.popCommand();
-                        last.undo();
+                        try{
+                            last.undo();
+                        }
+                        catch (Exception e){
+                            ConsoleUI.print("Error doing undo: " + e.getMessage());
+                            currentUser.pushCommand(last);
+                        }
+
                     } else {
                         ConsoleUI.print("⚠️ You have no previous modifications to undo.");
                     }
@@ -139,7 +144,6 @@ public class Main {
         selectCategories(categorizedEvent);
 
         // full event
-
         ConsoleUI.print("\n✅ Event created successfully!");
         ConsoleUI.print(categorizedEvent.getDescription());
 
@@ -560,6 +564,4 @@ public class Main {
 
         ConsoleUI.print("✅ Registered for: " + selected.getName());
     }
-
-
 }

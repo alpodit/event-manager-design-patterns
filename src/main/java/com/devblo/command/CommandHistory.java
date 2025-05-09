@@ -9,7 +9,7 @@ public class CommandHistory {
         history.push(cmd);
     }
 
-    public void undoLast() {
+    public void undoLast() throws Exception {
         if (history.isEmpty()) {
             System.out.println("⚠️ Nothing to undo.");
             return;
