@@ -19,25 +19,6 @@ import java.util.Map;
 
 // TODO: Handle edge case where users modify an event then deletes and undo's the action. Should say the no undo's to do.
 
-//A. Event Creation Module: +
-//    +    • Accept event details including event name, location, date, time, and organizer information.
-//    +    • Allow users to assign up to three categories to each event (e.g., Concert, Seminar, Workshop).
-//    +    • Allow users to assign up to three descriptive tags to each event (e.g., Free Entry, Online, Family-
-//        Friendly).
-//    +    • Users can save the entered event details by selecting “Save Event.”
-//B. Event Modification Module:
-//        • A user can modify any event.
-//        • A user can update event details such as location, date, time, and description.
-//        • A user can modify categories and tags associated with an event.
-//        • The system supports undo functionality to revert the most recent modification.
-//C. Event Search Module:
-//    +    • Users can search for events by name, tags, categories, or date.
-//    +    • Users can sort the search results in either ascending or descending order by event name.
-//D. Event Registration Module:
-//        • Members can register to attend events.
-//        • The system maintains a registration count for each event.
-//        • Members can cancel their registration.
-
 public class Main {
     private static final Map<String, User> userMap = new HashMap<>();
     private static final Map<String, Event> eventMap = new HashMap<>();
@@ -76,8 +57,6 @@ public class Main {
                 }
                 case 6 -> unregisterEventFlow();
                 case 7 -> {
-                    System.out.println("Logout: "+ currentUser.getRegisteredEvents());
-
                     currentUser = null;
                     authMenu();
                 }
@@ -87,7 +66,6 @@ public class Main {
                 }
                 default -> ConsoleUI.print("❌ Invalid choice. Try again.");
             }
-
         }
     }
 
@@ -135,6 +113,16 @@ public class Main {
         ConsoleUI.print("\n📅 Create a New Event");
 
         String name = ConsoleUI.prompt("Enter event name:");
+        while (true){
+            if (eventMap.containsKey(name)) {
+                ConsoleUI.print("<UNK> Event name already exists.");
+
+                name = ConsoleUI.prompt("Enter event name:");
+            }else {
+                break;
+            }
+        }
+
         String location = ConsoleUI.prompt("Enter event location:");
         LocalDateTime dateTime = promptDateTime();
         String organizer = ConsoleUI.prompt("Organizer name:");
@@ -235,6 +223,17 @@ public class Main {
         ConsoleUI.print("Leave fields blank to keep current values.");
 
         String newName = ConsoleUI.prompt("New name (current: " + event.getName() + "):").trim();
+
+        while (true){
+            if (!newName.isEmpty() && eventMap.containsKey(newName)) {
+                ConsoleUI.print("<UNK> Event name already exists.");
+
+                newName = ConsoleUI.prompt("New name (current: " + event.getName() + "):").trim();
+            }else {
+                break;
+            }
+        }
+
         String newLoc = ConsoleUI.prompt("New location (current: " + event.getLocation() + "):").trim();
         String newDesc = ConsoleUI.prompt("New description (current: " + event.getDescriptionText() + "):").trim();
 
@@ -247,10 +246,11 @@ public class Main {
         if (!dateInput.isEmpty() && !timeInput.isEmpty()) {
             try {
                 String[] dateParts = dateInput.split("-");
-                String[] timeParts = timeInput.split(":");
                 int year = Integer.parseInt(dateParts[0]);
                 int month = Integer.parseInt(dateParts[1]);
                 int day = Integer.parseInt(dateParts[2]);
+
+                String[] timeParts = timeInput.split(":");
                 int hour = Integer.parseInt(timeParts[0]);
                 int minute = Integer.parseInt(timeParts[1]);
 
