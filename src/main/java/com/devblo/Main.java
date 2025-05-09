@@ -8,7 +8,6 @@ import com.devblo.decorators.TagDecorator;
 import com.devblo.factory.EventFactory;
 import com.devblo.models.Event;
 import com.devblo.models.User;
-import com.devblo.observer.Observer;
 import com.devblo.strategy.*;
 import com.devblo.ui.ConsoleUI;
 
@@ -18,8 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO: User'ın oluşturduğu eventler'e 2 defa kaydediyor veya modifiye edildiğinde 2. kez kaydediyor bir şekilde
-// TODO: User created eventler silinmiyor sanırım anlamadım. Update edildiğinde 3 tane göstermiş, böyle olmaması lazım
+// TODO: Handle edge case where users modify an event then deletes and undo's the action. Should say the no undo's to do.
 
 //A. Event Creation Module: +
 //    +    • Accept event details including event name, location, date, time, and organizer information.
@@ -47,7 +45,7 @@ public class Main {
     private static User currentUser = null;
 
     public static void main(String[] args) {
-        authMenu(); // Ensure login
+        authMenu();
 
         while (true) {
             ConsoleUI.print("\nMain Menu:");
@@ -56,7 +54,7 @@ public class Main {
             ConsoleUI.print("3 - Search Events");
             ConsoleUI.print("4 - Modify an Event");
             ConsoleUI.print("5 - Undo Last Action");
-            ConsoleUI.print("6 - Unregister from Event");
+            ConsoleUI.print("6 - Unregister from an Event");
             ConsoleUI.print("7 - Logout");
             ConsoleUI.print("8 - Exit");
 
@@ -151,6 +149,8 @@ public class Main {
         // Decorate with categories
         CategoryDecorator categorizedEvent = new CategoryDecorator(taggedEvent);
         selectCategories(categorizedEvent);
+
+        // full event
 
         ConsoleUI.print("\n✅ Event created successfully!");
         ConsoleUI.print(categorizedEvent.getDescription());
@@ -273,20 +273,12 @@ public class Main {
                 event, newName, newLoc, newDesc, newDateTime, newTags, newCats, eventMap, currentUser
         );
         cmd.execute();
-        currentUser.pushCommand(cmd);
     }
 
     private static void handleDeleteEvent(Event event) {
-        List<Observer> removedObservers = new ArrayList<>(event.getObservers());
-        for (Observer o : removedObservers) {
-            event.removeObserver(o);
-            if (o instanceof User user) {
-                user.removeEvent(event);
-            }
-        }
 
-        eventMap.remove(event.getName());
-        System.out.println("🗑️ Event deleted: " + event.getName());
+        DeleteEventCommand cmd = new DeleteEventCommand(event, currentUser, eventMap);
+        cmd.execute();
 
     }
 
@@ -456,7 +448,7 @@ public class Main {
                 for (Category c : selectedCategories) {
                     decorator.addCategory(c);
                 }
-                break; // success
+                break;
             }
 
             ConsoleUI.print("🔁 Please enter valid category numbers.");

@@ -8,6 +8,7 @@ import com.devblo.decorators.TagDecorator;
 import com.devblo.decorators.CategoryDecorator;
 import com.devblo.factory.EventFactory;
 import com.devblo.observer.Observer;
+import com.devblo.ui.ConsoleUI;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class UpdateEventCommand implements Command {
     private Event newEvent;
     private final Map<String, Event> eventMap;
     private final List<Observer> previousObservers;
+    private final User user;
 
     public UpdateEventCommand(Event original,
                               String updatedName,
@@ -37,6 +39,7 @@ public class UpdateEventCommand implements Command {
         this.oldEvent = original;
         this.eventMap = eventMap;
         this.previousObservers = new ArrayList<>(original.getObservers());
+        this.user=currentUser;
 
         // ✅ Use factory with all updated fields
         Event updatedCore = EventFactory.createEvent(
@@ -84,6 +87,7 @@ public class UpdateEventCommand implements Command {
         // Update map and notify observers
         eventMap.put(newName, newEvent);
         newEvent.notifyObservers();
+        user.pushCommand(this);
         System.out.println("✅ Event updated.");
     }
 
@@ -112,6 +116,6 @@ public class UpdateEventCommand implements Command {
 
         // Notify observers
         oldEvent.notifyObservers();
-        System.out.println("↩️ Undo: Reverted event to original version.");
+        ConsoleUI.print("↩️ Undo: Reverted event: "+oldName+" to original version.");
     }
 }

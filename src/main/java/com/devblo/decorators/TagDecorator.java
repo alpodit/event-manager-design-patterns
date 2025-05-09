@@ -20,7 +20,6 @@ public class TagDecorator extends EventDecorator {
 
     @Override
     public List<Tag> getTags() {
-        System.out.println("TagDecorator.getTags()");
         return tags;
     }
 
